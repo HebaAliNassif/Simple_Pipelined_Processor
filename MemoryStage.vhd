@@ -7,7 +7,7 @@ Generic (n:integer:= 32);
 port(
 Clock,Reset : in std_logic;
 Rdst_Data,SP,PC,AluOutput : in std_logic_vector((n-1) downto 0);
-ControlSignals: in std_logic_vector(19 downto 0);
+ControlSignals: in std_logic_vector(18 downto 0);
 MemOutput,SP_Out, PC_Out: out std_logic_vector((n-1) downto 0)
 );
 end MemoryStage;
