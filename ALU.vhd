@@ -5,11 +5,13 @@ use ieee.numeric_std.all;
 
 entity ALU is
      generic (n : integer := 32);
-     port (clk, rst, CCR_enable: in std_logic;
+     port (clk, rst, CCR_enable,BranchOP: in std_logic;
            Rsrc, Rdst: in std_logic_vector(n-1 downto 0);
            result: out std_logic_vector(n-1 downto 0);
            ALUControl : in std_logic_vector(4 downto 0);
-	   CCR: inout std_logic_vector(2 downto 0)); 
+	   CCR: inout std_logic_vector(2 downto 0);
+	   BranchEnable: out std_logic
+	   ); 
 	   --carry, zero and negative flags
 	   
 end entity ALU;
@@ -138,5 +140,8 @@ process(clk)
                                   and ALUControl /= "00001" and ALUControl /= "00010")               
 
     else CCR(2); 
-
+	
+	BranchEnable<='1' when BranchOP='1' and ((CCR(0)='1' and ALUControl="10010") or (CCR(1)='1' and ALUControl="10001") or (CCR(2)='1' and ALUControl="10000"))
+	else '0';
+	
 end structALU;
