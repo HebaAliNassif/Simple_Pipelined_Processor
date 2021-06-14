@@ -64,11 +64,11 @@ architecture ModelProcessor of Processor is
 				Rsrc_In, Rdst_In: in std_logic_vector(31 downto 0);
 				Immediate : in std_logic_vector(15 downto 0);
 				ControlSignals : in std_logic_vector(18 downto 0);
-				--DATA_FORWARD_EN_RSRC, DATA_FORWARD_EN_RDST: IN STD_LOGIC;
-				--DATA_FORWARD_RSRC, DATA_FORWARD_RDST: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-				--Rsrc_Out, Rdst_Out: out std_logic_vector(31 downto 0);
 				AluOutput  : out std_logic_vector(31 downto 0);
-				BranchEnable: out std_logic
+				BranchEnable: out std_logic;
+				ReadData1_Forward_Enable, ReadData2_Forward_Enable: in std_logic;
+				ReadData1_Forward, ReadData2_Forward: in std_logic_vector(31 downto 0);
+				Rsrc_Out, Rdst_Out: out std_logic_vector(31 downto 0)
 			);
 	end component;
 	component IE_MEM is
@@ -98,6 +98,14 @@ architecture ModelProcessor of Processor is
 				ControlSignals_Out : out std_logic_vector(18 downto 0);
 				WriteBackIndex_out : out std_logic_vector(2 downto 0)
 				);
+	end component;
+	component DataForward is
+	port (RegWriteEnable, MemWriteEnable, MemToRegEnable : in std_logic;
+		ReadDataIndex2_ID_IE, ReadDataIndex2_IE_Mem,ReadDataIndex2_Mem_WB, ReadDataIndex1_ID_IE: in std_logic_vector(2 downto 0);
+		ReadDataIndex1_ID,ReadDataIndex2_ID : in std_logic_vector(2 downto 0);
+        	ALUOutput_IE_Mem, ALUOutput_Mem_WB, MemOutput_Mem_WB: in std_logic_vector(31 downto 0);
+		ReadData1_Forward_Enable, ReadData2_Forward_Enable, StallEnable: out std_logic;
+		ReadData1_Forward, ReadData2_Forward: out std_logic_vector(31 downto 0));
 	end component;
 	
 	
@@ -130,6 +138,10 @@ signal ALUOutput_IE_MEM,  ALUOutput_MEM_WB: std_logic_vector(31 downto 0) := (OT
 signal MemOutput_MEM: std_logic_vector(31 downto 0) := (OTHERS => '0');
 signal MemOutput_MEM_WB: std_logic_vector(31 downto 0) := (OTHERS => '0');
 signal RdstIndex_In_IE_MEM : std_logic_vector(2 downto 0)  := (OTHERS => '0');
+
+
+signal ReadData1_Forward_Enable, ReadData2_Forward_Enable: std_logic;
+signal ReadData1_Forward, ReadData2_Forward: std_logic_vector(31 downto 0);
 begin
 
 	--------PC register-----------
@@ -156,7 +168,7 @@ begin
 	--------Execute stage-----------
 	branch_address <= readData2_ID_IE;			--RDS out mn el ex stage
 	executionStageExc: ExecutionStage PORT MAP(Clock, Reset, readData1_ID_IE, readData2_ID_IE, immediate_ID_IE, ControlSignals_ID_IE, 
-												ALUOutput_IE, branch);
+												ALUOutput_IE, branch,ReadData1_Forward_Enable, ReadData2_Forward_Enable,readData1_ID_IE,readData2_ID_IE);
 
 	
 	IE_MEMExc: IE_MEM PORT MAP(Clock, Reset, Enable_Buffers, pc_out_ID_IE, readData1_ID_IE, readData2_ID_IE, ALUOutput_IE, pc_out_IE_MEM,
@@ -177,19 +189,18 @@ begin
 	 
 
 	--------WriteBack stage-----------
-	--MemoryOut from MemStage
-	--RdstIndexIn from instruction
-	--ExcutionDataOut from ExcStage
 
-	RegWriteEnable<= ControlSignals(6);
-	WriteBackData <= MemoryOut when ControlSignals(3) = '1'
-		else InPort when ControlSignals(8) = '1' 
-		else ExcutionDataOut;
+	RegWriteEnable<= ControlSignals_MEM_WB(6);
+	WriteBackData <= MemOutput_MEM_WB when ControlSignals_MEM_WB(3) = '1'
+		else InPort when ControlSignals_MEM_WB(8) = '1' 
+		else ALUOutput_MEM_WB;
 
-		--RdstIndex<= RdstIndexIn(2 DOWNTO 0);	
-		
-	--writing WriteBackData at RdstIndex with enable=RegWriteEnable in Register file
-
+	
+	-------DataForwarding--------------
+	DF: DataForward PORT MAP (ControlSignals_IE_MEM(6), ControlSignals_MEM_WB(5), ControlSignals_MEM_WB(3),
+        				regReadDataIndex2_ID_IE, regReadDataIndex2_IE_MEM,WriteBackIndex, regReadDataIndex1_ID_IE,
+        				instruction_IF_ID(7 downto 5), instruction_IF_ID(2 downto 0),ALUOutput_IE_MEM, ALUOutput_MEM_WB, MemOutput_MEM_WB,
+        				ReadData1_Forward_Enable, ReadData2_Forward_Enable, Stall,ReadData1_Forward, ReadData2_Forward);
 	process (Reset, Clock)
     begin
         if Reset = '1' then
