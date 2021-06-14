@@ -23,9 +23,9 @@ Write_Data : in std_logic_vector( (n - 1) downto 0);
 Read_Data : out std_logic_vector( (n - 1) downto 0)
 );
 end Component;
-Signal MemWriteSignal,SPSrc,PC_To_Mem: std_logic;
-Signal Address,Write_Data,Read_Data,CurrentSP : std_logic_vector( (n - 1) downto 0);
-Signal SP_OP:std_logic_vector( 1 downto 0);
+Signal MemWriteSignal,SPSrc,PC_To_Mem: std_logic := '0';
+Signal Address,Write_Data,Read_Data,CurrentSP : std_logic_vector( (n - 1) downto 0) := (OTHERS => '0');
+Signal SP_OP:std_logic_vector( 1 downto 0) := (OTHERS => '0');
 begin
 MemWriteSignal<=ControlSignals(5); 
 
@@ -47,7 +47,7 @@ Write_Data<= PC when PC_To_Mem='1'
 else Rdst_Data;
 
 
-DataMemory:Memory GENERIC MAP(n/2,1048576) PORT MAP(Clock, MemWriteSignal, Reset, Address, Write_Data, Read_Data);
+DataMemory:Memory GENERIC MAP(n,1048576) PORT MAP(Clock, MemWriteSignal, Reset, Address, Write_Data, Read_Data);
 
 MemOutput<=(OTHERS => '0') WHEN Reset = '1'
 else Read_Data;
