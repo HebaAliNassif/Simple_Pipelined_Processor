@@ -4,7 +4,7 @@ USE IEEE.std_logic_1164.ALL;
 ENTITY ExecutionStage IS
 	PORT (
 		Clock, Reset : IN STD_LOGIC;
-		Rsrc_In, Rdst_In : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		Rsrc_In, Rdst_In ,InPort: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		Immediate : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ControlSignals : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
 		AluOutput : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -45,6 +45,8 @@ BEGIN
 	RdstActualValue <= Zero & Immediate WHEN ControlSignals(13) = '0'
 		ELSE
 		ReadData2_Forward WHEN ReadData2_Forward_Enable = '1'
+		ELSE 
+		InPort WHEN ControlSignals(8) = '1'
 		ELSE
 		Rdst_In;
 

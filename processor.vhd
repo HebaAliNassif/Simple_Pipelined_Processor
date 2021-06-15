@@ -70,17 +70,17 @@ ARCHITECTURE ModelProcessor OF Processor IS
 	END COMPONENT;
 	COMPONENT ExecutionStage IS
 		PORT (
-			Clock, Reset : IN STD_LOGIC;
-			Rsrc_In, Rdst_In : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-			Immediate : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-			ControlSignals : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
-			AluOutput : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-			BranchEnable : OUT STD_LOGIC;
-			ReadData1_Forward_Enable, ReadData2_Forward_Enable : IN STD_LOGIC;
-			ReadData1_Forward, ReadData2_Forward : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-			Rsrc_Out, Rdst_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-			CCR_Out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0)
-		);
+		Clock, Reset : IN STD_LOGIC;
+		Rsrc_In, Rdst_In ,InPort: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		Immediate : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+		ControlSignals : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
+		AluOutput : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		BranchEnable : OUT STD_LOGIC;
+		ReadData1_Forward_Enable, ReadData2_Forward_Enable : IN STD_LOGIC;
+		ReadData1_Forward, ReadData2_Forward : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		Rsrc_Out, Rdst_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		CCR_Out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0)
+	);
 	END COMPONENT;
 	COMPONENT IE_MEM IS
 		PORT (
@@ -202,7 +202,7 @@ BEGIN
 	--------Execute stage-----------
 	branch_address <= readData2_ID_IE; --RDS out mn el ex stage
 	executionStageExc : ExecutionStage PORT MAP(
-		Clock, Reset, readData1_ID_IE, readData2_ID_IE, immediate_ID_IE, ControlSignals_ID_IE,
+		Clock, Reset, readData1_ID_IE, readData2_ID_IE,InPort, immediate_ID_IE, ControlSignals_ID_IE,
 		ALUOutput_IE, branch, ReadData1_Forward_Enable, ReadData2_Forward_Enable,ReadData1_Forward_Value, ReadData2_Forward_Value,
 		readData1_IE, readData2_IE, CCR);
 
