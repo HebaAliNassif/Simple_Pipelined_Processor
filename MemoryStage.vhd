@@ -7,7 +7,7 @@ ENTITY MemoryStage IS
     PORT (
         Clock, Reset : IN STD_LOGIC;
         Rdst_Data, SP, PC, AluOutput : IN STD_LOGIC_VECTOR((n - 1) DOWNTO 0);
-        ControlSignals : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
+        ControlSignals : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         MemOutput, SP_Out, PC_Out : OUT STD_LOGIC_VECTOR((n - 1) DOWNTO 0);
         FirstLocationValue :  OUT STD_LOGIC_VECTOR((n - 1) DOWNTO 0)
     );
@@ -27,28 +27,29 @@ ARCHITECTURE MemoryStage_Arch OF MemoryStage IS
             FirstLocationValue :  OUT STD_LOGIC_VECTOR((n - 1) DOWNTO 0)
         );
     END COMPONENT;
-    SIGNAL MemWriteSignal, SPSrc, PC_To_Mem : STD_LOGIC := '0';
+    SIGNAL MemWriteSignal,MemReadSignal, SPSrc, PC_To_Mem : STD_LOGIC := '0';
     SIGNAL Address, Write_Data, Read_Data, CurrentSP, firstMemoryLocationValue : STD_LOGIC_VECTOR((n - 1) DOWNTO 0) := (OTHERS => '0');
     SIGNAL SP_OP : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '0');
 BEGIN
     MemWriteSignal <= ControlSignals(5);
+	MemReadSignal<=ControlSignals(19);
 
     SPSrc <= ControlSignals(9);
     SP_OP(1 DOWNTO 0) <= ControlSignals(11 DOWNTO 10);
 
-    CurrentSP <= STD_LOGIC_VECTOR(to_unsigned(to_integer(unsigned(SP)) - 2, CurrentSP'length)) WHEN SP_OP = "10" AND Clock = '1'
+    CurrentSP <= STD_LOGIC_VECTOR(to_unsigned(to_integer(unsigned(SP)) - 2, CurrentSP'length)) WHEN SP_OP = "10" AND Clock = '1' and MemWriteSignal='1'
         ELSE
-        STD_LOGIC_VECTOR(to_unsigned(to_integer(unsigned(SP)) + 2, CurrentSP'length)) WHEN SP_OP = "01" AND Clock = '1'
+        STD_LOGIC_VECTOR(to_unsigned(to_integer(unsigned(SP)) + 2, CurrentSP'length)) WHEN SP_OP = "01" AND Clock = '1' and MemReadSignal='1'
         ELSE
         (OTHERS => '0') WHEN Reset = '1'
         ELSE
         SP;
 
-    Address <= CurrentSP WHEN SPSrc = '1' AND MemWriteSignal = '0'
+    Address <= CurrentSP WHEN SPSrc = '1' AND MemReadSignal = '1'
         ELSE
         SP WHEN SPSrc = '1' AND MemWriteSignal = '1'
         ELSE
-        AluOutput WHEN SPSrc = '0' AND MemWriteSignal = '1'
+        AluOutput WHEN SPSrc = '0' AND (MemWriteSignal = '1' or MemReadSignal='1')
         ELSE
         (OTHERS => '0');
 

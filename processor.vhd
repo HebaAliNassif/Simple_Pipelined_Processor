@@ -37,7 +37,7 @@ ARCHITECTURE ModelProcessor OF Processor IS
 		PORT (
 			OpCode : IN STD_LOGIC_VECTOR(5 DOWNTO 0);
 			Reset : IN STD_LOGIC;
-			ControlSignals : OUT STD_LOGIC_VECTOR(18 DOWNTO 0)
+			ControlSignals : OUT STD_LOGIC_VECTOR(19 DOWNTO 0)
 		);
 	END COMPONENT;
 	COMPONENT MyRegister IS
@@ -63,9 +63,9 @@ ARCHITECTURE ModelProcessor OF Processor IS
 			regReadDataIndex1_in, regReadDataIndex2_in : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 			regReadDataIndex1_out, regReadDataIndex2_out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			immediateValue_in : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-			controlSignals_in : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
+			controlSignals_in : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
 			immediateValue_out : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-			controlSignals_out : OUT STD_LOGIC_VECTOR(18 DOWNTO 0)
+			controlSignals_out : OUT STD_LOGIC_VECTOR(19 DOWNTO 0)
 		);
 	END COMPONENT;
 	COMPONENT ExecutionStage IS
@@ -73,7 +73,7 @@ ARCHITECTURE ModelProcessor OF Processor IS
 			Clock, Reset : IN STD_LOGIC;
 			Rsrc_In, Rdst_In : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			Immediate : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-			ControlSignals : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
+			ControlSignals : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
 			AluOutput : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			BranchEnable : OUT STD_LOGIC;
 			ReadData1_Forward_Enable, ReadData2_Forward_Enable : IN STD_LOGIC;
@@ -88,15 +88,15 @@ ARCHITECTURE ModelProcessor OF Processor IS
 			pc_out, regReadDataValue1_out, regReadDataValue2_out, AluOutput_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			regReadDataIndex1_in, regReadDataIndex2_in : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 			regReadDataIndex1_out, regReadDataIndex2_out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-			controlSignals_in : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
-			controlSignals_out : OUT STD_LOGIC_VECTOR(18 DOWNTO 0));
+			controlSignals_in : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
+			controlSignals_out : OUT STD_LOGIC_VECTOR(19 DOWNTO 0));
 	END COMPONENT;
 	COMPONENT MemoryStage IS
 		GENERIC (n : INTEGER := 32);
 		PORT (
 			Clock, Reset : IN STD_LOGIC;
 			Rdst_Data, SP, PC, AluOutput : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-			ControlSignals : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
+			ControlSignals : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
 			MemOutput, SP_Out, PC_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			FirstLocationValue :  OUT STD_LOGIC_VECTOR((n - 1) DOWNTO 0)
 		);
@@ -105,16 +105,16 @@ ARCHITECTURE ModelProcessor OF Processor IS
 		PORT (
 			Clock, Reset, WriteEnable : IN STD_LOGIC;
 			RdstIndex_In : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-			ControlSignals_In : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
+			ControlSignals_In : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
 			PC_In, AluOutput_In, MemOutput_In : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			PC_Out, AluOutput_Out, MemOutput_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-			ControlSignals_Out : OUT STD_LOGIC_VECTOR(18 DOWNTO 0);
+			ControlSignals_Out : OUT STD_LOGIC_VECTOR(19 DOWNTO 0);
 			WriteBackIndex_out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0)
 		);
 	END COMPONENT;
 	COMPONENT DataForward IS
 		PORT (
-			RegWriteEnable, MemWriteEnable, MemToRegEnable : IN STD_LOGIC;
+			MemRead,RegWriteEnable, MemWriteEnable, MemToRegEnable : IN STD_LOGIC;
 			ReadDataIndex2_ID_IE, ReadDataIndex2_IE_Mem, ReadDataIndex2_Mem_WB, ReadDataIndex1_ID_IE : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 			ReadDataIndex1_ID, ReadDataIndex2_ID : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 			ALUOutput_IE_Mem, ALUOutput_Mem_WB, MemOutput_Mem_WB : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -130,9 +130,9 @@ ARCHITECTURE ModelProcessor OF Processor IS
 	SIGNAL Stall, branch, branch_return, Enable_Buffers : STD_LOGIC := ('0');
 	SIGNAL memoryLocationOfZero : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 
-	SIGNAL ControlSignals : STD_LOGIC_VECTOR(18 DOWNTO 0) := (OTHERS => '0');
-	SIGNAL ControlSignals_ID : STD_LOGIC_VECTOR(18 DOWNTO 0) := (OTHERS => '0');
-	SIGNAL ControlSignals_ID_IE, ControlSignals_IE_MEM, ControlSignals_MEM_WB : STD_LOGIC_VECTOR(18 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL ControlSignals : STD_LOGIC_VECTOR(19 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL ControlSignals_ID : STD_LOGIC_VECTOR(19 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL ControlSignals_ID_IE, ControlSignals_IE_MEM, ControlSignals_MEM_WB : STD_LOGIC_VECTOR(19 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL RegWriteEnable, PcWrite, SpWrite : STD_LOGIC := ('0');
 
 	SIGNAL WriteBackData, ExcutionDataOut, MemoryOut : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
@@ -223,7 +223,7 @@ BEGIN
 
 	-------DataForwarding--------------
 	DF : DataForward PORT MAP(
-		ControlSignals_IE_MEM(6), ControlSignals_MEM_WB(5), ControlSignals_MEM_WB(3),
+		ControlSignals_ID_IE(19),ControlSignals_IE_MEM(6), ControlSignals_MEM_WB(5), ControlSignals_MEM_WB(3),
 		regReadDataIndex2_ID_IE, regReadDataIndex2_IE_MEM, WriteBackIndex, regReadDataIndex1_ID_IE,
 		instruction_IF_ID(7 DOWNTO 5), instruction_IF_ID(2 DOWNTO 0), ALUOutput_IE_MEM, ALUOutput_MEM_WB, MemOutput_MEM_WB,
 		ReadData1_Forward_Enable, ReadData2_Forward_Enable, Stall, ReadData1_Forward_Value, ReadData2_Forward_Value);

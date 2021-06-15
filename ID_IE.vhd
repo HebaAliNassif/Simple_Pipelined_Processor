@@ -9,9 +9,9 @@ ENTITY ID_IE IS
             regReadDataIndex1_in, regReadDataIndex2_in : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
             regReadDataIndex1_out, regReadDataIndex2_out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
             immediateValue_in : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-            controlSignals_in : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
+            controlSignals_in : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
             immediateValue_out : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-            controlSignals_out : OUT STD_LOGIC_VECTOR(18 DOWNTO 0)
+            controlSignals_out : OUT STD_LOGIC_VECTOR(19 DOWNTO 0)
       );
 END ID_IE;
 

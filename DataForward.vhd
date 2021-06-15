@@ -3,7 +3,7 @@ USE IEEE.std_logic_1164.ALL;
 
 ENTITY DataForward IS
 	PORT (
-		RegWriteEnable, MemWriteEnable, MemToRegEnable : IN STD_LOGIC;
+		MemRead,RegWriteEnable, MemWriteEnable, MemToRegEnable : IN STD_LOGIC;
 		ReadDataIndex2_ID_IE, ReadDataIndex2_IE_Mem, ReadDataIndex2_Mem_WB, ReadDataIndex1_ID_IE : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 		ReadDataIndex1_ID, ReadDataIndex2_ID : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 		ALUOutput_IE_Mem, ALUOutput_Mem_WB, MemOutput_Mem_WB : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -35,7 +35,7 @@ ARCHITECTURE DataForward_Arch OF DataForward IS BEGIN
 		ELSE
 		(OTHERS => '0');
 
-	StallEnable <= '1' WHEN MemWriteEnable = '0' AND (ReadDataIndex1_ID_IE = ReadDataIndex2_ID_IE OR ReadDataIndex2_ID = ReadDataIndex2_ID_IE)
+	StallEnable <= '1' WHEN MemRead = '1' AND (ReadDataIndex1_ID_IE = ReadDataIndex2_ID_IE OR ReadDataIndex2_ID = ReadDataIndex2_ID_IE)
 		ELSE
 		'0';
 

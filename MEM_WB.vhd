@@ -5,10 +5,10 @@ ENTITY Mem_WB IS
 	PORT (
 		Clock, Reset, WriteEnable : IN STD_LOGIC;
 		RdstIndex_In : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-		ControlSignals_In : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
+		ControlSignals_In : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
 		PC_In, AluOutput_In, MemOutput_In : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		PC_Out, AluOutput_Out, MemOutput_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-		ControlSignals_Out : OUT STD_LOGIC_VECTOR(18 DOWNTO 0);
+		ControlSignals_Out : OUT STD_LOGIC_VECTOR(19 DOWNTO 0);
 		WriteBackIndex_out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0)
 	);
 END Mem_WB;

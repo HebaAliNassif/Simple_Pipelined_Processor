@@ -7,8 +7,8 @@ ENTITY IE_MEM IS PORT (
     pc_out, regReadDataValue1_out, regReadDataValue2_out, AluOutput_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
     regReadDataIndex1_in, regReadDataIndex2_in : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
     regReadDataIndex1_out, regReadDataIndex2_out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-    controlSignals_in : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
-    controlSignals_out : OUT STD_LOGIC_VECTOR(18 DOWNTO 0));
+    controlSignals_in : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
+    controlSignals_out : OUT STD_LOGIC_VECTOR(19 DOWNTO 0));
 END IE_MEM;
 
 ARCHITECTURE ModelIE_MEM OF IE_MEM IS BEGIN
