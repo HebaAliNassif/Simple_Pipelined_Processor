@@ -42,11 +42,11 @@ BEGIN
 		ELSE
 		Rsrc_In;
 
-	RdstActualValue <= Zero & Immediate WHEN ControlSignals(13) = '0'
+	RdstActualValue <= Zero & Immediate WHEN ControlSignals(12) = '1'
 		ELSE
-		ReadData2_Forward WHEN ReadData2_Forward_Enable = '1'
-		ELSE 
 		InPort WHEN ControlSignals(8) = '1'
+		ELSE 
+		ReadData2_Forward WHEN ReadData2_Forward_Enable = '1'
 		ELSE
 		Rdst_In;
 

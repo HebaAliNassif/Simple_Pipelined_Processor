@@ -58,7 +58,7 @@ BEGIN
 			ELSIF (OpCode = "010001") THEN --POP Rdst
 				CSTemp <= "10000010011001001000";
 			ELSIF (OpCode = "010010") THEN --LDM Rdst,Imm
-				CSTemp <= "00011001000001000000";
+				CSTemp <= "01010001000001000000";
 			ELSIF (OpCode = "010011") THEN --LDD Rdst,Offset(Rsrc)
 				CSTemp <= "10111010000001001000";
 			ELSIF (OpCode = "010100") THEN --STD Rdst,Offset(Rsrc)
