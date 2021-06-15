@@ -78,7 +78,8 @@ ARCHITECTURE ModelProcessor OF Processor IS
 			BranchEnable : OUT STD_LOGIC;
 			ReadData1_Forward_Enable, ReadData2_Forward_Enable : IN STD_LOGIC;
 			ReadData1_Forward, ReadData2_Forward : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-			Rsrc_Out, Rdst_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+			Rsrc_Out, Rdst_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+			CCR_Out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0)
 		);
 	END COMPONENT;
 	COMPONENT IE_MEM IS
@@ -153,9 +154,18 @@ ARCHITECTURE ModelProcessor OF Processor IS
 	SIGNAL MemOutput_MEM_WB : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL RdstIndex_In_IE_MEM : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL ReadData1_Forward_Enable, ReadData2_Forward_Enable : STD_LOGIC := '0';
-	SIGNAL ReadData1_Forward_Value, ReadData2_Forward_Value : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0'); 
+	SIGNAL ReadData1_Forward_Value, ReadData2_Forward_Value : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+
+	SIGNAL CCR  : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL CCR_C, CCR_N, CCR_Z  : STD_LOGIC :=  '0';
+
 BEGIN
+
 	--------Signals Assign-----------
+	CCR_C <= CCR(0);
+	CCR_N <= CCR(1);
+	CCR_Z <= CCR(2);
+	
 	OutPort <= WriteBackData when  ControlSignals_MEM_WB(7) = '1' else  (OTHERS => '0');
 	PcWrite <= NOT Stall;
 	RegWriteEnable <= ControlSignals_MEM_WB(6);
@@ -194,7 +204,7 @@ BEGIN
 	executionStageExc : ExecutionStage PORT MAP(
 		Clock, Reset, readData1_ID_IE, readData2_ID_IE, immediate_ID_IE, ControlSignals_ID_IE,
 		ALUOutput_IE, branch, ReadData1_Forward_Enable, ReadData2_Forward_Enable,ReadData1_Forward_Value, ReadData2_Forward_Value,
-		readData1_IE, readData2_IE);
+		readData1_IE, readData2_IE, CCR);
 
 	IE_MEMExc : IE_MEM PORT MAP(
 		Clock, Reset, Enable_Buffers, pc_out_ID_IE, readData1_IE, readData2_IE, ALUOutput_IE, pc_out_IE_MEM,
@@ -210,7 +220,7 @@ BEGIN
 		MemOutput_MEM, sp_next, pc_out_MEM, memoryLocationOfZero);
 
 	MEM_WBExc : Mem_WB PORT MAP(
-		Clock, Reset, Enable_Buffers, RdstIndex_In_IE_MEM, ControlSignals_IE_MEM,
+		Clock, Reset, Enable_Buffers, regReadDataIndex2_IE_MEM, ControlSignals_IE_MEM,
 		pc_out_MEM, ALUOutput_IE_MEM, MemOutput_MEM, pc_out_MEM_WB, ALUOutput_MEM_WB, MemOutput_MEM_WB,
 		ControlSignals_MEM_WB, WriteBackIndex);
 

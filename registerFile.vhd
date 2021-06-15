@@ -18,7 +18,7 @@ BEGIN
       PROCESS (clk, rst, enable)
       BEGIN
             IF rst = '1' THEN
-                  registers <= (OTHERS => (OTHERS => '0'));
+                  registers <= (OTHERS => (OTHERS => '1'));
                   REPORT "Resetting now";
             ELSIF clk = '0' AND enable = '1' THEN
                   registers(to_integer(unsigned(writeIndex))) <= writeData;

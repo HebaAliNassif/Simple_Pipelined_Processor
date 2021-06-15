@@ -110,50 +110,52 @@ BEGIN
           ELSE
           ALUResult;
      CCR(0) <= '0' WHEN rst = '1' --rst
-     OR (CCR_enable = '1' AND ALUControl = "00010") --clrc 
-     OR (ALUControl = b"10010" AND clk = '0') --jc
+          OR (CCR_enable = '1' AND ALUControl = "00010") --clrc 
+          OR (ALUControl = b"10010" AND clk = '0') --jc
 
-ELSE
-     '1' WHEN CCR_enable = '1' AND ALUControl = "00001" --setc    
+          ELSE
+               '1' WHEN CCR_enable = '1' AND ALUControl = "00001" --setc    
 
-ELSE
-     carryOut WHEN CCR_enable = '1' AND (ALUControl = "00111" --add
-     OR ALUControl = "01001" --sub
-     OR ALUControl = "00100" --inc
-     OR ALUControl = "00101" --dec 
-     OR ALUControl = "00111" --iadd
-     OR ALUControl = "01110" --ldd	
-     OR ALUControl = "01111") --std		
+          ELSE
+               carryOut WHEN CCR_enable = '1' AND (ALUControl = "00111" --add
+               OR ALUControl = "01001" --sub
+               OR ALUControl = "00100" --inc
+               OR ALUControl = "00101" --dec 
+               OR ALUControl = "00111" --iadd
+               OR ALUControl = "01110" --ldd	
+               OR ALUControl = "01111") --std		
 
-ELSE
-     Rsrc(n - shift) WHEN CCR_enable = '1' AND ALUControl = "01100" --shl
+          ELSE
+               Rsrc(n - shift) WHEN CCR_enable = '1' AND ALUControl = "01100" AND shift /= 0 --shl
 
-ELSE
-     Rsrc(shift - 1) WHEN CCR_enable = '1' AND ALUControl = "01101" --shr
+          ELSE
+               Rsrc(shift - 1) WHEN CCR_enable = '1' AND ALUControl = "01101" AND shift /= 0 --shr
 
-ELSE
-     CCR(0);
+          ELSE
+               CCR(0);
+
      CCR(1) <= '0' WHEN rst = '1' --rst
-     OR (ALUControl = "10001" AND clk = '0') --jn
+          OR (ALUControl = "10001" AND clk = '0') --jn
 
-ELSE
-     ALUResult(n - 1) WHEN CCR_enable = '1'
+          ELSE
+               ALUResult(n - 1) WHEN CCR_enable = '1'
 
-ELSE
-     CCR(1);
+          ELSE
+               CCR(1);
+
      CCR(2) <= '0' WHEN rst = '1' --rst
-     OR (ALUControl = "10000" AND clk = '0') --jz
-     OR (CCR_enable = '1' AND ALUResult /= zero)
+          OR (ALUControl = "10000" AND clk = '0') --jz
+          OR (CCR_enable = '1' AND ALUResult /= zero)
 
-ELSE
-     '1' WHEN (CCR_enable = '1' AND ALUResult = zero
-     AND ALUControl /= "00001" AND ALUControl /= "00010")
+          ELSE
+               '1' WHEN (CCR_enable = '1' AND ALUResult = zero
+               AND ALUControl /= "00001" AND ALUControl /= "00010")
 
-ELSE
-     CCR(2);
+          ELSE
+               CCR(2);
 
      BranchEnable <= '1' WHEN BranchOP = '1' AND ((CCR(0) = '1' AND ALUControl = "10010") OR (CCR(1) = '1' AND ALUControl = "10001") OR (CCR(2) = '1' AND ALUControl = "10000"))
-          ELSE
-          '0';
+               ELSE
+               '0';
 
 END structALU;

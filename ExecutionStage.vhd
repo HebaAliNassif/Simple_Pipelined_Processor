@@ -6,12 +6,13 @@ ENTITY ExecutionStage IS
 		Clock, Reset : IN STD_LOGIC;
 		Rsrc_In, Rdst_In : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		Immediate : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-		ControlSignals : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
+		ControlSignals : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
 		AluOutput : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 		BranchEnable : OUT STD_LOGIC;
 		ReadData1_Forward_Enable, ReadData2_Forward_Enable : IN STD_LOGIC;
 		ReadData1_Forward, ReadData2_Forward : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-		Rsrc_Out, Rdst_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+		Rsrc_Out, Rdst_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		CCR_Out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0)
 	);
 END ExecutionStage;
 
@@ -55,5 +56,5 @@ BEGIN
 	Rdst_Out <= ReadData2_Forward WHEN ReadData2_Forward_Enable = '1'
 		ELSE
 		Rdst_In;
-
+	CCR_Out <= CCRAluOutput;
 END ExecutionStage_Arch;
