@@ -1,147 +1,159 @@
-library ieee;
-library work;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
+LIBRARY ieee;
+LIBRARY work;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
 
-entity ALU is
-     generic (n : integer := 32);
-     port (clk, rst, CCR_enable,BranchOP: in std_logic;
-           Rsrc, Rdst: in std_logic_vector(n-1 downto 0);
-           result: out std_logic_vector(n-1 downto 0);
-           ALUControl : in std_logic_vector(4 downto 0);
-	   CCR: inout std_logic_vector(2 downto 0);
-	   BranchEnable: out std_logic
-	   ); 
-	   --carry, zero and negative flags
-	   
-end entity ALU;
+ENTITY ALU IS
+     GENERIC (n : INTEGER := 32);
+     PORT (
+          clk, rst, CCR_enable, BranchOP : IN STD_LOGIC;
+          Rsrc, Rdst : IN STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
+          result : OUT STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
+          ALUControl : IN STD_LOGIC_VECTOR(4 DOWNTO 0);
+          CCR : INOUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+          BranchEnable : OUT STD_LOGIC
+     );
+     --carry, zero and negative flags
 
-architecture structALU of ALU is
-     component nBitsAdder is
-          port (A, B : in std_logic_vector(n-1 downto 0);
-                Cin: in std_logic;
-		F : out std_logic_vector (n-1 downto 0); 
-		Cout : out std_logic);
-     end component;
-     
-     signal carryIn, carryOut : std_logic;
-     signal operand1, operand2, ALUResult, adderResult : std_logic_vector(n-1 downto 0); 
-     signal zero: std_logic_vector(n-1 downto 0) := (others => '0');
-     signal shift : integer := 0;
-     signal flag: std_logic_vector (2 downto 0):= "000";
-  
-begin
-shift <= to_integer(unsigned(Rdst(4 downto 0)));
+END ENTITY ALU;
 
-process(clk)
-     begin
-        if clk = '1' then
-            flag <= CCR;
-        end if;
-     end process;
+ARCHITECTURE structALU OF ALU IS
+     COMPONENT nBitsAdder IS
+          PORT (
+               A, B : IN STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
+               Cin : IN STD_LOGIC;
+               F : OUT STD_LOGIC_VECTOR (n - 1 DOWNTO 0);
+               Cout : OUT STD_LOGIC);
+     END COMPONENT;
 
-     
-     operand1 <= Rsrc            when ALUControl = "00111"                               --add
-                                   or ALUControl = "01001"                               --sub
- 				   or ALUControl = "01110"				 --ldd
- 				   or ALUControl = "01000"				 --std
-				   or ALUControl = "00111"                               --iadd
-				 
-     else Rdst                   when ALUControl = "00100"                               --inc
-                                   or ALUControl = "00101"                               --dec
+     SIGNAL carryIn, carryOut : STD_LOGIC;
+     SIGNAL operand1, operand2, ALUResult, adderResult : STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
+     SIGNAL zero : STD_LOGIC_VECTOR(n - 1 DOWNTO 0) := (OTHERS => '0');
+     SIGNAL shift : INTEGER := 0;
+     SIGNAL flag : STD_LOGIC_VECTOR (2 DOWNTO 0) := "000";
 
-     else (others => '0');
+BEGIN
+     shift <= to_integer(unsigned(Rdst(4 DOWNTO 0)));
 
-     operand2 <= Rdst            when ALUControl = "00111"                               --add
-				   or ALUControl = "01000"                               --iadd
- 				   or ALUControl = "01110"				 --ldd
- 				   or ALUControl = "01111" 				 --std
-     
-     else (NOT Rdst)             when ALUControl = "01001"                               --sub
-     else (others => '1')        when ALUControl = "00101"                               --dec      
-     else (others => '0');
+     PROCESS (clk)
+     BEGIN
+          IF clk = '1' THEN
+               flag <= CCR;
+          END IF;
+     END PROCESS;
+     operand1 <= Rsrc WHEN ALUControl = "00111" --add
+          OR ALUControl = "01001" --sub
+          OR ALUControl = "01110" --ldd
+          OR ALUControl = "01000" --std
+          OR ALUControl = "00111" --iadd
 
+          ELSE
+          Rdst WHEN ALUControl = "00100" --inc
+          OR ALUControl = "00101" --dec
 
-     carryIn <= '1'              when ALUControl = "00100"                               --inc
-                                   or ALUControl = "01001"                               --sub
+          ELSE
+          (OTHERS => '0');
 
-     else '0';
+     operand2 <= Rdst WHEN ALUControl = "00111" --add
+          OR ALUControl = "01000" --iadd
+          OR ALUControl = "01110" --ldd
+          OR ALUControl = "01111" --std
 
-    u0: nBitsAdder generic map(n) port map(operand1, operand2, carryIn, adderResult, carryOut);
+          ELSE
+          (NOT Rdst) WHEN ALUControl = "01001" --sub
+          ELSE
+          (OTHERS => '1') WHEN ALUControl = "00101" --dec      
+          ELSE
+          (OTHERS => '0');
+     carryIn <= '1' WHEN ALUControl = "00100" --inc
+          OR ALUControl = "01001" --sub
 
-    ALUResult <= Rsrc            when ALUControl = "00000"                                --nop
-                                   or ALUControl = "00110"                                --mov
-				   or ALUControl = "10000"	                          --jz           
-				   or ALUControl = "10001"                                --jn
-				   or ALUControl = "10010"                                --jc             
-  				   or ALUControl = "10011"                                --jmp
-                                   or ALUControl = "00110"                                --ldm
+          ELSE
+          '0';
 
+     u0 : nBitsAdder GENERIC MAP(n) PORT MAP(operand1, operand2, carryIn, adderResult, carryOut);
 
-    else Rsrc AND Rdst           when ALUControl = "01010"                                --and
+     ALUResult <= Rsrc WHEN ALUControl = "00000" --nop
+          OR ALUControl = "00110" --mov
+          OR ALUControl = "10000" --jz           
+          OR ALUControl = "10001" --jn
+          OR ALUControl = "10010" --jc             
+          OR ALUControl = "10011" --jmp
+          OR ALUControl = "00110" --ldm
+          ELSE
+          Rsrc AND Rdst WHEN ALUControl = "01010" --and
 
-    else Rsrc OR Rdst            when ALUControl = "01011"                                --or  
+          ELSE
+          Rsrc OR Rdst WHEN ALUControl = "01011" --or  
 
-    else (NOT Rdst)               when ALUControl = "00011"                               --not
-          
-    else adderResult             when ALUControl = "00111"				  --add
-                                   or ALUControl = "01001"                                --sub
-                                   or ALUControl = "00100"                                --inc 
-                                   or ALUControl = "00101"                                --dec
-				   or ALUControl = "01000"                                --iadd
-     				   or ALUControl = "01110"				  --ldd
- 				   or ALUControl = "01111" 				  --std
+          ELSE
+          (NOT Rdst) WHEN ALUControl = "00011" --not
 
-    else std_logic_vector(shift_left(unsigned(Rsrc), shift)) when ALUControl = "01100"    --shl
+          ELSE
+          adderResult WHEN ALUControl = "00111" --add
+          OR ALUControl = "01001" --sub
+          OR ALUControl = "00100" --inc 
+          OR ALUControl = "00101" --dec
+          OR ALUControl = "01000" --iadd
+          OR ALUControl = "01110" --ldd
+          OR ALUControl = "01111" --std
 
+          ELSE
+          STD_LOGIC_VECTOR(shift_left(unsigned(Rsrc), shift)) WHEN ALUControl = "01100" --shl
+          ELSE
+          STD_LOGIC_VECTOR(shift_right(unsigned(Rsrc), shift)) WHEN ALUControl = "01101" --shr
 
-    else std_logic_vector(shift_right(unsigned(Rsrc), shift)) when ALUControl = "01101"   --shr
+          ELSE
+          (OTHERS => '0');
 
-    else (others => '0');
+     result <= (OTHERS => '0') WHEN rst = '1'
+          ELSE
+          ALUResult;
+     CCR(0) <= '0' WHEN rst = '1' --rst
+     OR (CCR_enable = '1' AND ALUControl = "00010") --clrc 
+     OR (ALUControl = b"10010" AND clk = '0') --jc
 
-    result <= (others => '0') when rst = '1'
-    else ALUResult;
-    
+ELSE
+     '1' WHEN CCR_enable = '1' AND ALUControl = "00001" --setc    
 
-    CCR(0) <= '0'               when rst ='1'                                             --rst
-                                  or (CCR_enable = '1' and ALUControl = "00010")          --clrc 
-                                  or (ALUControl = b"10010" and clk = '0')                --jc
+ELSE
+     carryOut WHEN CCR_enable = '1' AND (ALUControl = "00111" --add
+     OR ALUControl = "01001" --sub
+     OR ALUControl = "00100" --inc
+     OR ALUControl = "00101" --dec 
+     OR ALUControl = "00111" --iadd
+     OR ALUControl = "01110" --ldd	
+     OR ALUControl = "01111") --std		
 
-    else '1'                    when CCR_enable = '1' and ALUControl = "00001"            --setc    
+ELSE
+     Rsrc(n - shift) WHEN CCR_enable = '1' AND ALUControl = "01100" --shl
 
-    else carryOut               when CCR_enable = '1' and (ALUControl = "00111"           --add
-                                                        or ALUControl = "01001"           --sub
-                                                        or ALUControl = "00100"           --inc
-                                                        or ALUControl = "00101"           --dec 
-                                                        or ALUControl = "00111"           --iadd
- 				                        or ALUControl = "01110"	          --ldd	
-		  				        or ALUControl = "01111")	  --std		
-	  
-    else Rsrc(n-shift)          when CCR_enable = '1' and ALUControl = "01100"            --shl
+ELSE
+     Rsrc(shift - 1) WHEN CCR_enable = '1' AND ALUControl = "01101" --shr
 
-    else Rsrc(shift-1)          when CCR_enable = '1' and ALUControl = "01101"            --shr
+ELSE
+     CCR(0);
+     CCR(1) <= '0' WHEN rst = '1' --rst
+     OR (ALUControl = "10001" AND clk = '0') --jn
 
-    else CCR(0);
+ELSE
+     ALUResult(n - 1) WHEN CCR_enable = '1'
 
+ELSE
+     CCR(1);
+     CCR(2) <= '0' WHEN rst = '1' --rst
+     OR (ALUControl = "10000" AND clk = '0') --jz
+     OR (CCR_enable = '1' AND ALUResult /= zero)
 
-    CCR(1) <= '0'               when rst ='1'                                             --rst
-                                  or (ALUControl = "10001" and clk = '0')                 --jn
+ELSE
+     '1' WHEN (CCR_enable = '1' AND ALUResult = zero
+     AND ALUControl /= "00001" AND ALUControl /= "00010")
 
-    else ALUResult(n-1)         when CCR_enable = '1'
+ELSE
+     CCR(2);
 
-    else CCR(1);
+     BranchEnable <= '1' WHEN BranchOP = '1' AND ((CCR(0) = '1' AND ALUControl = "10010") OR (CCR(1) = '1' AND ALUControl = "10001") OR (CCR(2) = '1' AND ALUControl = "10000"))
+          ELSE
+          '0';
 
-
-    CCR(2) <= '0'               when rst ='1'                                             --rst
-				or (ALUControl = "10000" and clk = '0')                   --jz
-				or (CCR_enable = '1' and ALUResult /= zero)                                                     
- 
-    else '1'                    when (CCR_enable = '1' and ALUResult = zero
-                                  and ALUControl /= "00001" and ALUControl /= "00010")               
-
-    else CCR(2); 
-	
-	BranchEnable<='1' when BranchOP='1' and ((CCR(0)='1' and ALUControl="10010") or (CCR(1)='1' and ALUControl="10001") or (CCR(2)='1' and ALUControl="10000"))
-	else '0';
-	
-end structALU;
+END structALU;

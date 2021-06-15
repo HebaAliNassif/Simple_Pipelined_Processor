@@ -1,52 +1,59 @@
 LIBRARY IEEE;
 USE IEEE.std_logic_1164.ALL;
 
-Entity ExecutionStage is
-	port (
-		Clock, Reset : in std_logic;
-		Rsrc_In, Rdst_In: in std_logic_vector(31 downto 0);
-        Immediate : in std_logic_vector(15 downto 0);
-        ControlSignals : in std_logic_vector(18 downto 0);
-		AluOutput  : out std_logic_vector(31 downto 0);
-        BranchEnable: out std_logic;
-		ReadData1_Forward_Enable, ReadData2_Forward_Enable: in std_logic;
-		ReadData1_Forward, ReadData2_Forward: in std_logic_vector(31 downto 0);
-		Rsrc_Out, Rdst_Out: out std_logic_vector(31 downto 0)
-    );
-end ExecutionStage;
+ENTITY ExecutionStage IS
+	PORT (
+		Clock, Reset : IN STD_LOGIC;
+		Rsrc_In, Rdst_In : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		Immediate : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+		ControlSignals : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
+		AluOutput : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		BranchEnable : OUT STD_LOGIC;
+		ReadData1_Forward_Enable, ReadData2_Forward_Enable : IN STD_LOGIC;
+		ReadData1_Forward, ReadData2_Forward : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		Rsrc_Out, Rdst_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+	);
+END ExecutionStage;
 
-Architecture ExecutionStage_Arch of ExecutionStage is
-Component ALU is
-     generic (n : integer := 32);
-     port (clk, rst, CCR_enable,BranchOP: in std_logic;
-           Rsrc, Rdst: in std_logic_vector(n-1 downto 0);
-           result: out std_logic_vector(n-1 downto 0);
-           ALUControl : in std_logic_vector(4 downto 0);
-	   CCR: inout std_logic_vector(2 downto 0);
-	   BranchEnable: out std_logic
-	   ); 
-	   
-	   --carry, zero and negative flags
-end Component;
+ARCHITECTURE ExecutionStage_Arch OF ExecutionStage IS
+	COMPONENT ALU IS
+		GENERIC (n : INTEGER := 32);
+		PORT (
+			clk, rst, CCR_enable, BranchOP : IN STD_LOGIC;
+			Rsrc, Rdst : IN STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
+			result : OUT STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
+			ALUControl : IN STD_LOGIC_VECTOR(4 DOWNTO 0);
+			CCR : INOUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+			BranchEnable : OUT STD_LOGIC
+		);
 
-signal RsrcActualValue,RdstActualValue:std_logic_vector(31 downto 0):=(others=>'0');
-signal CCRAluOutput:std_logic_vector(2 downto 0):=(others=>'0');
-signal Zero:std_logic_vector(15 downto 0):=(others=>'0');
-begin
+		--carry, zero and negative flags
+	END COMPONENT;
 
-RsrcActualValue<=Rdst_In when ControlSignals(12)='1'
-else ReadData1_Forward when ReadData1_Forward_Enable='1'
-else Rsrc_In;
+	SIGNAL RsrcActualValue, RdstActualValue : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL CCRAluOutput : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL Zero : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+BEGIN
 
-RdstActualValue<= Zero & Immediate  when ControlSignals(13)='0'
-else ReadData2_Forward when ReadData2_Forward_Enable='1'
-else Rdst_In;
+	RsrcActualValue <= Rdst_In WHEN ControlSignals(12) = '1'
+		ELSE
+		ReadData1_Forward WHEN ReadData1_Forward_Enable = '1'
+		ELSE
+		Rsrc_In;
 
-AluExec: ALU Generic Map(32) Port Map(Clock,Reset,ControlSignals(1),ControlSignals(2),RsrcActualValue,RdstActualValue,AluOutput,ControlSignals(18 downto 14),CCRAluOutput,BranchEnable);
+	RdstActualValue <= Zero & Immediate WHEN ControlSignals(13) = '0'
+		ELSE
+		ReadData2_Forward WHEN ReadData2_Forward_Enable = '1'
+		ELSE
+		Rdst_In;
 
-Rsrc_Out<=ReadData1_Forward when ReadData1_Forward_Enable='1'
-else Rsrc_In;
-Rdst_Out<=ReadData2_Forward when ReadData2_Forward_Enable='1'
-else Rdst_In;
+	AluExec : ALU GENERIC MAP(32) PORT MAP(Clock, Reset, ControlSignals(1), ControlSignals(2), RsrcActualValue, RdstActualValue, AluOutput, ControlSignals(18 DOWNTO 14), CCRAluOutput, BranchEnable);
 
-end ExecutionStage_Arch;
+	Rsrc_Out <= ReadData1_Forward WHEN ReadData1_Forward_Enable = '1'
+		ELSE
+		Rsrc_In;
+	Rdst_Out <= ReadData2_Forward WHEN ReadData2_Forward_Enable = '1'
+		ELSE
+		Rdst_In;
+
+END ExecutionStage_Arch;

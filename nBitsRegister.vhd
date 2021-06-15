@@ -1,21 +1,22 @@
-library ieee;
-use ieee.std_logic_1164.all;
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
 
-entity nBitsRegister is
-     generic(n : integer := 32);
-     port(clk, enable, rst : in std_logic;
-	  d: in std_logic_vector(n-1 downto 0);
-	  q: out std_logic_vector(n-1 downto 0));
-end nBitsRegister;
+ENTITY nBitsRegister IS
+     GENERIC (n : INTEGER := 32);
+     PORT (
+          clk, enable, rst : IN STD_LOGIC;
+          d : IN STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
+          q : OUT STD_LOGIC_VECTOR(n - 1 DOWNTO 0));
+END nBitsRegister;
 
-architecture struct_register of nBitsRegister is
-begin
-     process(clk, rst, enable)
-     begin
-          if rst = '1' then
-	       q <= (others=>'0');
-	  elsif clk = '0' and enable = '1' then
-	       q <= d;
-	  end if;
-     end process;
-end struct_register;
+ARCHITECTURE struct_register OF nBitsRegister IS
+BEGIN
+     PROCESS (clk, rst, enable)
+     BEGIN
+          IF rst = '1' THEN
+               q <= (OTHERS => '0');
+          ELSIF clk = '0' AND enable = '1' THEN
+               q <= d;
+          END IF;
+     END PROCESS;
+END struct_register;

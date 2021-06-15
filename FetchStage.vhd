@@ -1,51 +1,59 @@
 LIBRARY IEEE;
-USE IEEE.std_logic_1164.all;
-use ieee.numeric_std.all;
+USE IEEE.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
 
-entity FetchStage is 
-	Generic (n:integer:= 32; SpaceSize:integer:= 1000);
-	port (instruction, immediate: out std_logic_vector(15 downto 0);
-		branch, branch_return : in std_logic;
-		branch_address, branch_return_address : in std_logic_vector(31 downto 0);
-		pc: in std_logic_vector(31 downto 0);
-		pc_out, pc_next: out std_logic_vector(31 downto 0);
-		PcWrite : out std_logic;
-		Clock, Reset, Stall: in std_logic
+ENTITY FetchStage IS
+	GENERIC (
+		n : INTEGER := 32;
+		SpaceSize : INTEGER := 1000);
+	PORT (
+		instruction, immediate : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		memoryLocationOfZero : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+		branch, branch_return : IN STD_LOGIC;
+		branch_address, branch_return_address : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		pc : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		pc_out, pc_next : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		Clock, Reset, ResetSignal : IN STD_LOGIC
 	);
-end FetchStage;     
-architecture ModelFetchStage of FetchStage is
-	component Memory is
-		Generic (n:integer:= 32; SpaceSize:integer:= 1000);
-		port(
-			Clock, Mem_Write, Reset: in std_logic;
-			Address : in std_logic_vector(n - 1 downto 0);
-			Write_Data : in std_logic_vector( (n - 1) downto 0);
-			Read_Data : out std_logic_vector( (n - 1) downto 0)
-			);
-	end component;
-	signal  Mem_Write :std_logic := '0';
-	signal  Address, Write_Data, Read_Data: std_logic_vector(31 downto 0):= (OTHERS => '0');
-begin
-	INSTRUCTION_MEMORY: Memory GENERIC MAP(n, SpaceSize) PORT MAP(Clock, Mem_Write, Reset, Address, Write_Data, Read_Data);
+END FetchStage;
+ARCHITECTURE ModelFetchStage OF FetchStage IS
+	COMPONENT Memory IS
+		GENERIC (
+			n : INTEGER := 32;
+			SpaceSize : INTEGER := 1000);
+		PORT (
+			Clock, Mem_Write, Reset : IN STD_LOGIC;
+			Address : IN STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
+			Write_Data : IN STD_LOGIC_VECTOR((n - 1) DOWNTO 0);
+			Read_Data : OUT STD_LOGIC_VECTOR((n - 1) DOWNTO 0);
+			FirstLocationValue :  OUT STD_LOGIC_VECTOR((n - 1) DOWNTO 0)
+		);
+	END COMPONENT;
+	SIGNAL Mem_Write : STD_LOGIC := '0';
+	SIGNAL Address, Write_Data, Read_Data : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+BEGIN
+	INSTRUCTION_MEMORY : Memory GENERIC MAP(n, SpaceSize) PORT MAP(Clock, Mem_Write, Reset, Address, Write_Data, Read_Data);
 
-	process (Clock)
-	begin
-		if falling_edge(Clock) and Reset = '0' then
+	PROCESS (Clock)
+	BEGIN
+		IF falling_edge(Clock) AND Reset = '0' THEN
 			Address <= pc;
-            --Mem_Write <= '1';
-		end if;
-	end process;
+		END IF;
+	END PROCESS;
 
-	pc_next <=  x"0000" & Read_Data(31 downto 16) when Reset = '1'
-		else branch_address when branch = '1'
-		else branch_return_address when branch_return = '1'
-        else std_logic_vector(to_unsigned(to_integer(unsigned(pc)) + 2, pc_next'length )) when Read_Data(31 downto 26) = "001010" 
-												or Read_Data(31 downto 26) = "010010" 
-												or Read_Data(31 downto 26) = "010011" 
-												or Read_Data(31 downto 26) = "010100" 
-        else std_logic_vector(to_unsigned(to_integer(unsigned(pc)) + 1, pc_next'length ));
-	PcWrite <= not Stall;
+	pc_next <= x"0000" & memoryLocationOfZero WHEN ResetSignal = '1'
+		ELSE
+		branch_address WHEN branch = '1'
+		ELSE
+		branch_return_address WHEN branch_return = '1'
+		ELSE
+		STD_LOGIC_VECTOR(to_unsigned(to_integer(unsigned(pc)) + 2, pc_next'length)) WHEN Read_Data(31 DOWNTO 26) = "001010"
+		OR Read_Data(31 DOWNTO 26) = "010010"
+		OR Read_Data(31 DOWNTO 26) = "010011"
+		OR Read_Data(31 DOWNTO 26) = "010100"
+		ELSE
+		STD_LOGIC_VECTOR(to_unsigned(to_integer(unsigned(pc)) + 1, pc_next'length));
 	pc_out <= pc;
-        instruction <= Read_Data(31 downto 16);
-        immediate <= Read_Data(15 downto 0);
-end architecture;
+	instruction <= Read_Data(31 DOWNTO 16);
+	immediate <= Read_Data(15 DOWNTO 0);
+END ARCHITECTURE;

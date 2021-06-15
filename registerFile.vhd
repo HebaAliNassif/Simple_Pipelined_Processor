@@ -1,30 +1,31 @@
-library IEEE;
-use IEEE.std_logic_1164.ALL;
-use ieee.numeric_std.all;
+LIBRARY IEEE;
+USE IEEE.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
 
-entity registerFile is
-	generic (n : integer := 32);
-	port (clk, enable, rst : in std_logic;
-	      writeData : in std_logic_vector(n-1 downto 0);
-              writeIndex, readIndex1, readIndex2 : in std_logic_vector(2 downto 0);
-	      readData1, readData2 : out std_logic_vector(n-1 downto 0));
-end registerFile;
+ENTITY RegisterFile IS
+      GENERIC (n : INTEGER := 32);
+      PORT (
+            clk, enable, rst : IN STD_LOGIC;
+            writeData : IN STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
+            writeIndex, readIndex1, readIndex2 : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+            readData1, readData2 : OUT STD_LOGIC_VECTOR(n - 1 DOWNTO 0));
+END RegisterFile;
 
-architecture structRegisterFile of registerFile is
-      type registers_array is array(0 to 7) of std_logic_vector(n-1 downto 0);
-      signal registers: registers_array;
-begin
-     process (clk, rst, enable)
-          begin
-	       if rst = '1' then
-                    registers <= (others => (others => '0'));
-                    report "Resetting now";
-	       elsif clk = '0' and enable = '1' then
-                    registers(to_integer(unsigned( writeIndex))) <= writeData;
-		    report "Writing now";
-	       end if;
-	end process;
-    readData1 <= registers(to_integer(unsigned( readIndex1)));
-    readData2 <= registers(to_integer(unsigned( readIndex2)));
+ARCHITECTURE structRegisterFile OF RegisterFile IS
+      TYPE registers_array IS ARRAY(0 TO 7) OF STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
+      SIGNAL registers : registers_array;
+BEGIN
+      PROCESS (clk, rst, enable)
+      BEGIN
+            IF rst = '1' THEN
+                  registers <= (OTHERS => (OTHERS => '0'));
+                  REPORT "Resetting now";
+            ELSIF clk = '0' AND enable = '1' THEN
+                  registers(to_integer(unsigned(writeIndex))) <= writeData;
+                  REPORT "Writing now";
+            END IF;
+      END PROCESS;
+      readData1 <= registers(to_integer(unsigned(readIndex1)));
+      readData2 <= registers(to_integer(unsigned(readIndex2)));
 
-end structRegisterFile;
+END structRegisterFile;

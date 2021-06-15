@@ -1,23 +1,24 @@
 LIBRARY IEEE;
-USE IEEE.std_logic_1164.all;
+USE IEEE.std_logic_1164.ALL;
 
-entity MyRegister is
-generic ( n : integer := 32);
-port( Clk, Rst, Enable : in std_logic;
-d : in std_logic_vector((n-1) downto 0);
-q : out std_logic_vector((n-1) downto 0));
-end MyRegister;
+ENTITY MyRegister IS
+	GENERIC (n : INTEGER := 32);
+	PORT (
+		Clk, Rst, Enable : IN STD_LOGIC;
+		d : IN STD_LOGIC_VECTOR((n - 1) DOWNTO 0);
+		q : OUT STD_LOGIC_VECTOR((n - 1) DOWNTO 0));
+END MyRegister;
 
-architecture ModelMyRegister of MyRegister is
-begin
-	process (Clk,Rst)
-	begin
-		if Rst = '1' then
-			q <= (others=>'0');
-		elsif rising_edge(Clk) then
-			if Enable = '1' then
+ARCHITECTURE ModelMyRegister OF MyRegister IS
+BEGIN
+	PROCESS (Clk, Rst)
+	BEGIN
+		IF Rst = '1' THEN
+			q <= (OTHERS => '0');
+		ELSIF rising_edge(Clk) THEN
+			IF Enable = '1' THEN
 				q <= d;
-			end if;
-		end if;
-	end process;
-end architecture;
+			END IF;
+		END IF;
+	END PROCESS;
+END ARCHITECTURE;

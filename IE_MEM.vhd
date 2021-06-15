@@ -1,27 +1,27 @@
 LIBRARY IEEE;
 USE IEEE.std_logic_1164.ALL;
 
-Entity IE_MEM is port (
-Clock, Reset, Enable: in std_logic;
-pc_in, regReadDataValue1_in,  regReadDataValue2_in,AluOutput_in: in std_logic_vector(31 downto 0);
-pc_out, regReadDataValue1_out,  regReadDataValue2_out,AluOutput_out: out std_logic_vector(31 downto 0);
-regReadDataIndex1_in,  regReadDataIndex2_in: in std_logic_vector(2 downto 0);
-regReadDataIndex1_out,  regReadDataIndex2_out: out std_logic_vector(2 downto 0);
-controlSignals_in: in std_logic_vector(18 downto 0);
-controlSignals_out: out std_logic_vector(18 downto 0));
-end IE_MEM;
+ENTITY IE_MEM IS PORT (
+    Clock, Reset, Enable : IN STD_LOGIC;
+    pc_in, regReadDataValue1_in, regReadDataValue2_in, AluOutput_in : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    pc_out, regReadDataValue1_out, regReadDataValue2_out, AluOutput_out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+    regReadDataIndex1_in, regReadDataIndex2_in : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+    regReadDataIndex1_out, regReadDataIndex2_out : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+    controlSignals_in : IN STD_LOGIC_VECTOR(18 DOWNTO 0);
+    controlSignals_out : OUT STD_LOGIC_VECTOR(18 DOWNTO 0));
+END IE_MEM;
 
-Architecture ModelIE_MEM of IE_MEM is begin
-process (Clock, Reset, Enable) begin
-	if Reset = '1' then
-            pc_out <= (others=>'0');
-            regReadDataValue1_out <= (others=>'0');
-            regReadDataValue2_out <= (others=>'0');
-            AluOutput_out <= (others=>'0');
-            controlSignals_out <= (others=>'0');
-            regReadDataIndex1_out <= (others=>'0');
-            regReadDataIndex2_out <= (others=>'0');
-	elsif rising_edge(Clock)and Enable = '1' then
+ARCHITECTURE ModelIE_MEM OF IE_MEM IS BEGIN
+    PROCESS (Clock, Reset, Enable) BEGIN
+        IF Reset = '1' THEN
+            pc_out <= (OTHERS => '0');
+            regReadDataValue1_out <= (OTHERS => '0');
+            regReadDataValue2_out <= (OTHERS => '0');
+            AluOutput_out <= (OTHERS => '0');
+            controlSignals_out <= (OTHERS => '0');
+            regReadDataIndex1_out <= (OTHERS => '0');
+            regReadDataIndex2_out <= (OTHERS => '0');
+        ELSIF rising_edge(Clock)AND Enable = '1' THEN
             pc_out <= pc_in;
             regReadDataValue1_out <= regReadDataValue1_in;
             regReadDataValue2_out <= regReadDataValue2_in;
@@ -29,6 +29,6 @@ process (Clock, Reset, Enable) begin
             controlSignals_out <= controlSignals_in;
             regReadDataIndex1_out <= regReadDataIndex1_in;
             regReadDataIndex2_out <= regReadDataIndex2_in;
-	end if;
-end process;
-end architecture;
+        END IF;
+    END PROCESS;
+END ARCHITECTURE;
