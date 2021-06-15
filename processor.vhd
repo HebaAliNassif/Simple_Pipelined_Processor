@@ -227,8 +227,6 @@ BEGIN
 	--------WriteBack stage-----------
 	WriteBackData <= MemOutput_MEM_WB WHEN ControlSignals_MEM_WB(3) = '1'
 		ELSE
-		InPort WHEN ControlSignals_MEM_WB(8) = '1'
-		ELSE
 		ALUOutput_MEM_WB;
 
 	-------DataForwarding--------------
