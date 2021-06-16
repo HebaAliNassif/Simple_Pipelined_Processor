@@ -36,13 +36,15 @@ ARCHITECTURE ExecutionStage_Arch OF ExecutionStage IS
 	SIGNAL Zero : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
 BEGIN
 
-	RsrcActualValue <= Rdst_In WHEN ControlSignals(12) = '1'
+	RsrcActualValue <= ReadData2_Forward WHEN ReadData2_Forward_Enable = '1' AND ControlSignals(12) = '1'
+		ELSE 
+		Rdst_In WHEN ControlSignals(12) = '1'
 		ELSE
 		ReadData1_Forward WHEN ReadData1_Forward_Enable = '1'
 		ELSE
 		Rsrc_In;
 
-	RdstActualValue <= Zero & Immediate WHEN ControlSignals(12) = '1'
+	RdstActualValue <= Zero & Immediate WHEN ControlSignals(12) = '1' or ControlSignals(18 downto 14) ="01110" or ControlSignals(18 downto 14)="01111"
 		ELSE
 		InPort WHEN ControlSignals(8) = '1'
 		ELSE 

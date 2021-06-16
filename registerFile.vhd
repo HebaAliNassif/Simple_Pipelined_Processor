@@ -12,8 +12,8 @@ ENTITY RegisterFile IS
 END RegisterFile;
 
 ARCHITECTURE structRegisterFile OF RegisterFile IS
-      TYPE registers_array IS ARRAY(0 TO 7) OF STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
-      SIGNAL registers : registers_array;
+      TYPE registers_array IS ARRAY(0 TO 7) OF STD_LOGIC_VECTOR(n - 1 DOWNTO 0) ;
+      SIGNAL registers : registers_array :=(OTHERS => (OTHERS => '0'));
 BEGIN
       PROCESS (clk, rst, enable)
       BEGIN

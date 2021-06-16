@@ -55,6 +55,13 @@ ARCHITECTURE ModelProcessor OF Processor IS
 			writeIndex, readIndex1, readIndex2 : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 			readData1, readData2 : OUT STD_LOGIC_VECTOR(31 DOWNTO 0));
 	END COMPONENT;
+	COMPONENT MyRegisterPC IS
+	GENERIC (n : INTEGER := 32);
+			PORT (
+				Clk, Rst, Enable : IN STD_LOGIC;
+				d : IN STD_LOGIC_VECTOR((n - 1) DOWNTO 0);
+				q : OUT STD_LOGIC_VECTOR((n - 1) DOWNTO 0));
+	END COMPONENT;
 	COMPONENT ID_IE IS
 		PORT (
 			Clock, Reset, Enable, Stall : IN STD_LOGIC;
@@ -96,7 +103,7 @@ ARCHITECTURE ModelProcessor OF Processor IS
 		GENERIC (n : INTEGER := 32);
 		PORT (
 			Clock, Reset : IN STD_LOGIC;
-			Rdst_Data, SP, PC, AluOutput : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			Rdst_Data, Rsrc_Data, SP, PC, AluOutput : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			ControlSignals : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
 			MemOutput, SP_Out, PC_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			FirstLocationValue :  OUT STD_LOGIC_VECTOR((n - 1) DOWNTO 0)
@@ -115,14 +122,16 @@ ARCHITECTURE ModelProcessor OF Processor IS
 	END COMPONENT;
 	COMPONENT DataForward IS
 		PORT (
-		MemRead_ID_IE,RegWriteEnable_IE_MEM, RegWriteEnable_MEM_WB, MemToRegEnable_MEM_WB : IN STD_LOGIC;
-		ReadDataIndex2_ID_IE, ReadDataIndex2_IE_Mem, ReadDataIndex2_Mem_WB, ReadDataIndex1_ID_IE : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-		ReadDataIndex1_ID, ReadDataIndex2_ID : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-		ALUOutput_IE_Mem, ALUOutput_Mem_WB, MemOutput_Mem_WB : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-		ReadData1_Forward_Enable, ReadData2_Forward_Enable, StallEnable : OUT STD_LOGIC;
-		ReadData1_Forward, ReadData2_Forward : OUT STD_LOGIC_VECTOR(31 DOWNTO 0));
+			RegWriteEnable_IE_MEM, RegWriteEnable_MEM_WB, MemToRegEnable_MEM_WB, MemRead_ID_IE : IN STD_LOGIC;
+			ReadDataIndex2_ID_IE, ReadDataIndex2_IE_Mem, ReadDataIndex2_Mem_WB, ReadDataIndex1_ID_IE : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+			ReadDataIndex1_ID, ReadDataIndex2_ID : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+			ALUOutput_IE_Mem, ALUOutput_Mem_WB, MemOutput_Mem_WB: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			ReadData1_Forward_Enable, ReadData2_Forward_Enable, StallEnable: OUT STD_LOGIC;
+			ReadData1_Forward, ReadData2_Forward: OUT STD_LOGIC_VECTOR(31 DOWNTO 0));
 	END COMPONENT;
-	SIGNAL sp, sp_next, sp_out_MEM : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+
+	SIGNAL sp  : STD_LOGIC_VECTOR(31 DOWNTO 0) := x"00000010";
+	SIGNAL  sp_next, sp_out_MEM : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL pc, pc_out_IF, pc_next_IF, pc_out_MEM : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL pc_out_IF_ID, pc_out_ID_IE, pc_out_IE_MEM, pc_out_MEM_WB : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL branch_address, branch_return_address : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
@@ -173,7 +182,7 @@ BEGIN
 					ELSE '0';
 
 	--------PC register-----------
-	PCReg : MyRegister PORT MAP(Clock, Reset, PcWrite, pc_next_IF, pc);
+	PCReg : MyRegisterPC PORT MAP(Clock, Reset, PcWrite, pc_next_IF, pc);
 	--------SP register-----------
 	SPReg : MyRegister PORT MAP(Clock, Reset, SpWrite, sp_next, sp);
 
@@ -216,7 +225,7 @@ BEGIN
 	branch_return_address <= MemOutput_MEM;
 
 	memoryStageExc : MemoryStage PORT MAP(
-		Clock, Reset, readData2_IE_MEM, sp, pc_out_IE_MEM, ALUOutput_IE_MEM, ControlSignals_IE_MEM,
+		Clock, Reset, readData2_IE_MEM, readData1_IE_MEM, sp, pc_out_IE_MEM, ALUOutput_IE_MEM, ControlSignals_IE_MEM,
 		MemOutput_MEM, sp_next, pc_out_MEM, memoryLocationOfZero);
 
 	MEM_WBExc : Mem_WB PORT MAP(
@@ -231,8 +240,8 @@ BEGIN
 
 	-------DataForwarding--------------
 	DF : DataForward PORT MAP(
-		ControlSignals_ID_IE(19),ControlSignals_IE_MEM(6), ControlSignals_MEM_WB(6), ControlSignals_MEM_WB(3),
-		regReadDataIndex2_ID_IE, regReadDataIndex2_IE_MEM, WriteBackIndex, regReadDataIndex1_ID_IE,
+		ControlSignals_IE_MEM(6), ControlSignals_MEM_WB(6), ControlSignals_MEM_WB(3), ControlSignals_ID_IE(19),
+		regReadDataIndex2_IE_MEM, WriteBackIndex, regReadDataIndex1_ID_IE, regReadDataIndex2_ID_IE,
 		instruction_IF_ID(7 DOWNTO 5), instruction_IF_ID(2 DOWNTO 0), ALUOutput_IE_MEM, ALUOutput_MEM_WB, MemOutput_MEM_WB,
 		ReadData1_Forward_Enable, ReadData2_Forward_Enable, Stall, ReadData1_Forward_Value, ReadData2_Forward_Value);
 

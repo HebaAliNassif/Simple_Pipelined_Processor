@@ -30,26 +30,16 @@ ARCHITECTURE structALU OF ALU IS
      SIGNAL operand1, operand2, ALUResult, adderResult : STD_LOGIC_VECTOR(n - 1 DOWNTO 0);
      SIGNAL zero : STD_LOGIC_VECTOR(n - 1 DOWNTO 0) := (OTHERS => '0');
      SIGNAL shift : INTEGER := 0;
-     SIGNAL RsrcINT, RdstINT, ALUControlINT, resultINT : INTEGER := 0;
      SIGNAL flag : STD_LOGIC_VECTOR (2 DOWNTO 0) := "000";
 
 BEGIN
-     shift <= to_integer(unsigned(Rsrc));
-     RsrcINT <= to_integer(unsigned(Rsrc));
-     RdstINT <= to_integer(unsigned(Rdst));
-     ALUControlINT <= to_integer(unsigned(ALUControl));
+     shift <= to_integer(unsigned(Rdst(4 downto 0))) when ALUControl = "01100" or ALUControl = "01101"
+          else      1;
 
      PROCESS (clk)
      BEGIN
           IF RISING_EDGE(clk) THEN
                flag <= CCR;
-               report "RISING Rsrc=" & integer'image(RsrcINT);
-               report "RISING Rdst=" & integer'image(RdstINT);
-               report "RISING ALUControl=" & integer'image(ALUControlINT);
-          ELSIF FALLING_EDGE(clk) THEN
-               report "Rsrc=" & integer'image(RsrcINT);
-               report "Rdst=" & integer'image(RdstINT);
-               report "ALUControl=" & integer'image(ALUControlINT);
           END IF;
      END PROCESS;
      operand1 <= Rsrc WHEN ALUControl = "00111" --add
@@ -111,9 +101,9 @@ BEGIN
           OR ALUControl = "01111" --std
 
           ELSE
-          STD_LOGIC_VECTOR(shift_left(unsigned(Rdst), shift)) WHEN ALUControl = "01100" --shl
+          STD_LOGIC_VECTOR(shift_left(unsigned(Rsrc), shift)) WHEN ALUControl = "01100" --shl
           ELSE
-          STD_LOGIC_VECTOR(shift_right(unsigned(Rdst), shift)) WHEN ALUControl = "01101" --shr
+          STD_LOGIC_VECTOR(shift_right(unsigned(Rsrc), shift)) WHEN ALUControl = "01101" --shr
 
           ELSE
           (OTHERS => '0');
@@ -138,10 +128,10 @@ BEGIN
                OR ALUControl = "01111") --std		
 
           ELSE
-               Rdst(n - shift) WHEN CCR_enable = '1' AND ALUControl = "01100" AND shift /= 0 --shl
+               Rsrc(n - shift) WHEN CCR_enable = '1' AND ALUControl = "01100" AND shift /= 0 --shl
 
           ELSE
-               Rdst(shift - 1) WHEN CCR_enable = '1' AND ALUControl = "01101" AND shift /= 0 --shr
+               Rsrc(shift - 1) WHEN CCR_enable = '1' AND ALUControl = "01101" AND shift /= 0 --shr
 
           ELSE
                CCR(0);

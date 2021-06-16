@@ -6,7 +6,7 @@ ENTITY MemoryStage IS
     GENERIC (n : INTEGER := 32);
     PORT (
         Clock, Reset : IN STD_LOGIC;
-        Rdst_Data, SP, PC, AluOutput : IN STD_LOGIC_VECTOR((n - 1) DOWNTO 0);
+        Rdst_Data, Rsrc_Data, SP, PC, AluOutput : IN STD_LOGIC_VECTOR((n - 1) DOWNTO 0);
         ControlSignals : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         MemOutput, SP_Out, PC_Out : OUT STD_LOGIC_VECTOR((n - 1) DOWNTO 0);
         FirstLocationValue :  OUT STD_LOGIC_VECTOR((n - 1) DOWNTO 0)
@@ -41,7 +41,7 @@ BEGIN
         ELSE
         STD_LOGIC_VECTOR(to_unsigned(to_integer(unsigned(SP)) + 2, CurrentSP'length)) WHEN SP_OP = "01" AND Clock = '1' and MemReadSignal='1'
         ELSE
-        (OTHERS => '0') WHEN Reset = '1'
+        (x"00000010") WHEN Reset = '1'
         ELSE
         SP;
 

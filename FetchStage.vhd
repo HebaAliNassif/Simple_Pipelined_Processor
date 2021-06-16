@@ -41,7 +41,7 @@ BEGIN
 		END IF;
 	END PROCESS;
 
-	pc_next <= x"0000" & memoryLocationOfZero WHEN ResetSignal = '1'
+	pc_next <= x"00000000"  WHEN ResetSignal = '1' --& memoryLocationOfZero
 		ELSE
 		branch_address WHEN branch = '1'
 		ELSE
