@@ -16,16 +16,12 @@ in R3     #R3=100
 in R4     #R4=300
 Push R4   #sp=FFFFFFFC, M[FFFFFFFE]=300
 JMP R1 
-NOP
-NOP
 INC R1	  # this statement shouldn't be executed,
  
 #check flag fowarding  
 .ORG 30
 AND R1,R5   #R5=0 , Z = 1
 JZ  R2      #Jump taken, Z = 0
-NOP
-NOP
 SETC        # this statement shouldn't be executed, C-->1
 
 #check on flag updated on jump
@@ -37,8 +33,6 @@ JC R3      #Jump Not taken
 NOT R5     #R5=FFFF, Z= 0, C--> not change, N=1
 in  R6     #R6=200, flag no change
 JN  R6     #jump taken, N = 0
-NOP
-NOP
 INC R1
 
 .ORG 100
@@ -51,8 +45,6 @@ out R6
 SETC      #C-->1
 POP R6     #R6=300, SP=FFFFFFFE
 Call R6    #SP=FFFFFFFC, M[FFFFFFFE]=half next PC,M[FFFFFFFF]=other half next PC
-NOP
-NOP
 INC R6	  #R6=401, this statement shouldn't be executed till call returns, C--> 0, N-->0,Z-->0
 NOP
 NOP
@@ -62,8 +54,6 @@ NOP
 Add R3,R6 #R6=400
 Add R1,R2 #R1=80, C->0,N=0, Z=0
 ret
-NOP
-NOP
 SetC           #this shouldnot be executed
 
 .ORG 500
