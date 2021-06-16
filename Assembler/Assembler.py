@@ -52,6 +52,7 @@ twoOperandsInstructions = ["MOV", "ADD", "IADD", "SUB", "AND", "OR", "SHL", "SHR
 
 addresses = []                               
 instructions = []                            
+currentAddress = -1
 
 for index, instruction in enumerate(readInstructions):         
     instruction = instruction.upper().replace("\n","").replace("\t","").replace(",", " ").replace("(", " ").replace(")", "")    # remove new lines, spaces, commas and brackets from instruction
@@ -66,20 +67,23 @@ for index, instruction in enumerate(readInstructions):
             continue
         
         currentAddress += 1
-        
+ 
         instructions.append(instructionsList)
         addresses.append(currentAddress)
+        ##currentAddress += 1
+        #print(currentAddress)
+
+        
+        if(instructionsList[0]== "IADD" or instructionsList[0] == "LDM" or instructionsList[0] == "LDD" or instructionsList[0] == "STD" or instructionsList[0] == "SHL" or instructionsList[0] == "SHR"):    # handling two words instruction 
+            currentAddress += 1
         
 
-        if(instruction[0]== "IADD" or instruction[0] == "LDM" or instruction[0] == "LDD" or instruction[0] == "STD"):    # handling two words instruction 
-            currentAddress += 1
    
-
 #################################
 # Change Instructions to Opcode #
 #################################
 
-memory = ['0000000000000000'] * 1000
+memory = ['0000000000000000'] * 2000
 
 registers = {
    "R0" : "00000",
@@ -142,23 +146,35 @@ for index, instruction in enumerate(instructions):
          elif(instruction[0] == "SHL" or instruction[0] == "SHR"):
             code += instructionsOpcode[instruction[0]]
             #print(code)                
-            code += "{0:0>5b}".format(int(instruction[2], 16))
+            code += "00000"
             #print(code)                
             code += registers[instruction[1]]
-            #print(code)                
+            #print(code)     
             memory[addresses[index]] = code
-            
+            immediateValue = "{0:0>16b}".format(int(instruction[2], 16))
+            memory[addresses[index]+1] = immediateValue
+            #print(immediateValue)                                
+          
+         else:
+            code += instructionsOpcode[instruction[0]]
+            code += registers[instruction[1]]
+            code += registers[instruction[2]]
+            memory[addresses[index]] = code
+          
     else: # handling interrupt or reset
         code += "{0:0>16b}".format(int(instruction[0], 16))
         #print(code)                
         memory[addresses[index]] = code
-       
+    
+
+    
+    
 
 #####################
 # Write Memory File #
 #####################
 
-fileW = open('myMemory.mem', "w")
+fileW = open('Memory.mem', "w")
 fileW.write("// instance=/ram/ram\n")
 fileW.write("// format=mti addressradix=d dataradix=b version=1.0 wordsperline=1\n")
 
