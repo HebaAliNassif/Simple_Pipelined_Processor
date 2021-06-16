@@ -22,7 +22,7 @@ ARCHITECTURE Memory_Arch OF Memory IS
 
 BEGIN
     PROCESS (Clock) IS BEGIN
-        IF Clock = '0' AND Mem_Write = '1' THEN
+        IF falling_edge(Clock) AND Mem_Write = '1' THEN
             Memory(to_integer(unsigned(Address))) <= Write_Data(31 DOWNTO 16);
             Memory(to_integer(unsigned(Address)) + 1) <= Write_Data(15 DOWNTO 0);
         END IF;

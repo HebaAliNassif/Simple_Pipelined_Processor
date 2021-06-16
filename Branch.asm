@@ -45,6 +45,7 @@ INC R1
 CLRC
 AND R0,R0    #N=0,Z=1
 out R6
+rti
 
 #check on load use
 .ORG 200

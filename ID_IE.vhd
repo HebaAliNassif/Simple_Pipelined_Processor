@@ -19,7 +19,7 @@ ARCHITECTURE ModelID_IE OF ID_IE IS
 BEGIN
       PROCESS (Clock, Reset, Enable)
       BEGIN
-            IF Reset = '1' THEN
+            IF  rising_edge(Clock) and Reset = '1' THEN
                   pc_out <= (OTHERS => '0');
                   regReadDataValue1_out <= (OTHERS => '0');
                   regReadDataValue2_out <= (OTHERS => '0');

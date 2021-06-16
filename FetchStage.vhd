@@ -13,7 +13,7 @@ ENTITY FetchStage IS
 		branch_address, branch_return_address : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		pc : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		pc_out, pc_next : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-		Clock, Reset, ResetSignal : IN STD_LOGIC
+		Clock, Reset : IN STD_LOGIC
 	);
 END FetchStage;
 ARCHITECTURE ModelFetchStage OF FetchStage IS
@@ -31,17 +31,18 @@ ARCHITECTURE ModelFetchStage OF FetchStage IS
 	END COMPONENT;
 	SIGNAL Mem_Write : STD_LOGIC := '0';
 	SIGNAL Address, Write_Data, Read_Data : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL FirstLocationVal: STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 BEGIN
-	INSTRUCTION_MEMORY : Memory GENERIC MAP(n, SpaceSize) PORT MAP(Clock, Mem_Write, Reset, Address, Write_Data, Read_Data);
+	INSTRUCTION_MEMORY : Memory GENERIC MAP(n, SpaceSize) PORT MAP(Clock, Mem_Write, Reset, Address, Write_Data, Read_Data, FirstLocationVal);
 
 	PROCESS (Clock)
 	BEGIN
-		IF falling_edge(Clock) AND Reset = '0' THEN
+		IF Clock = '1' THEN
 			Address <= pc;
 		END IF;
 	END PROCESS;
 
-	pc_next <= x"00000000"  WHEN ResetSignal = '1' --& memoryLocationOfZero
+	pc_next <= x"0000" & FirstLocationVal(31 downto 16) when Reset = '1'
 		ELSE
 		branch_address WHEN branch = '1'
 		ELSE
@@ -51,6 +52,8 @@ BEGIN
 		OR Read_Data(31 DOWNTO 26) = "010010"
 		OR Read_Data(31 DOWNTO 26) = "010011"
 		OR Read_Data(31 DOWNTO 26) = "010100"
+		OR Read_Data(31 DOWNTO 26) = "001110"
+		OR Read_Data(31 DOWNTO 26) = "001111"
 		ELSE
 		STD_LOGIC_VECTOR(to_unsigned(to_integer(unsigned(pc)) + 1, pc_next'length));
 	pc_out <= pc;

@@ -21,7 +21,7 @@ ARCHITECTURE ModelProcessor OF Processor IS
 			branch_address, branch_return_address : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			pc : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			pc_out, pc_next : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-			Clock, Reset, ResetSignal : IN STD_LOGIC
+			Clock, Reset : IN STD_LOGIC
 		);
 	END COMPONENT;
 	COMPONENT IF_ID IS
@@ -189,7 +189,7 @@ BEGIN
 	--------Fetch stage-----------
 	fetchStageExc : FetchStage PORT MAP(
 		instruction_IF, immediate_IF, memoryLocationOfZero(31 downto 16), branch, branch_return, branch_address, branch_return_address, pc, pc_out_IF, pc_next_IF,
-		Clock, Reset, ResetSignal);
+		Clock, Reset);
 
 	IF_IDExc : IF_ID PORT MAP(
 		Clock, Reset, Enable_Buffers, Stall, instruction_IF, immediate_IF, pc_out_IF, instruction_IF_ID, immediate_IF_ID,

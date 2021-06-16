@@ -113,7 +113,7 @@ BEGIN
           ALUResult;
      CCR(0) <= '0' WHEN rst = '1' --rst
           OR (CCR_enable = '1' AND ALUControl = "00010") --clrc 
-          OR (ALUControl = b"10010" AND clk = '0') --jc
+          OR (ALUControl = b"10010" AND Falling_edge(clk)) --jc
 
           ELSE
                '1' WHEN CCR_enable = '1' AND ALUControl = "00001" --setc    
@@ -137,7 +137,7 @@ BEGIN
                CCR(0);
 
      CCR(1) <= '0' WHEN rst = '1' --rst
-          OR (ALUControl = "10001" AND clk = '0') --jn
+          OR (ALUControl = "10001" AND Falling_edge(clk)) --jn
 
           ELSE
                ALUResult(n - 1) WHEN CCR_enable = '1'
@@ -146,7 +146,7 @@ BEGIN
                CCR(1);
 
      CCR(2) <= '0' WHEN rst = '1' --rst
-          OR (ALUControl = "10000" AND clk = '0') --jz
+          OR (ALUControl = "10000" AND Falling_edge(clk)) --jz
           OR (CCR_enable = '1' AND ALUResult /= zero)
 
           ELSE
@@ -156,7 +156,7 @@ BEGIN
           ELSE
                CCR(2);
 
-     BranchEnable <= '1' WHEN BranchOP = '1' AND ((CCR(0) = '1' AND ALUControl = "10010") OR (CCR(1) = '1' AND ALUControl = "10001") OR (CCR(2) = '1' AND ALUControl = "10000"))
+     BranchEnable <= '1' WHEN BranchOP = '1' AND ((flag(0) = '1' AND ALUControl = "10010") OR (flag(1) = '1' AND ALUControl = "10001") OR (flag(2) = '1' AND ALUControl = "10000") OR (ALUControl = "10011"))
                ELSE
                '0';
 

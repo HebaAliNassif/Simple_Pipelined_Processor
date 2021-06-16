@@ -14,8 +14,8 @@ BEGIN
 	PROCESS (Clk, Rst)
 	BEGIN
 		IF Rst = '1' THEN
-			q <= (OTHERS => '0');
-		ELSIF rising_edge(Clk) THEN
+			q <= d;
+		ELSIF Clk = '0' THEN
 			IF Enable = '1' THEN
 				q <= d;
 			END IF;
